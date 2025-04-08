@@ -1,0 +1,51 @@
+* sync.nvim
+
+A Neovim plugin for syncing local and remote directories using `rsync`.
+It helps with automating the deployment process by providing options to sync files between the local and remote machines, either on-demand or automatically.
+
+** Features
+
+- Sync local and remote directories using `rsync`.
+- Auto-sync on file save (configurable).
+- Dry-run mode for testing synchronization.
+- Auto-load configuration from `.deploy.lua` when opening files.
+
+** Setup
+
+1. Install the plugin using your preferred plugin manager, e.g., [Packer](https://github.com/wbthomason/packer.nvim):
+
+   #+BEGIN_SRC lua
+   use 'mrkatebzadeh/sync.nvim'
+   #+END_SRC
+
+2. Configure the plugin in your `init.lua`:
+
+   #+BEGIN_SRC lua
+   require('sync').setup({
+     auto_sync = true,
+     dry_run = true,
+     auto_start = true,
+     ignore = { ".git", "node_modules" },
+   })
+   #+END_SRC
+
+3. Create a `.deploy.lua` file at the root of your project to specify sync settings:
+
+   #+BEGIN_SRC lua
+   return {
+      root_local = "~/MyProject",
+      root_remote = "remotehost:~/MyProject",
+      auto_sync = true,
+      ignore = { ".git" },
+   }
+   #+END_SRC
+
+** Commands
+
+- `:SyncNow` - Sync the directories immediately.
+- `:SyncDryRun` - Run a dry-run to preview the sync without making changes.
+- `:SyncReloadConfig` - Reload the config from .deploy.lua
+
+** License
+
+This plugin is licensed under the GNU General Public License v2. See [LICENSE](LICENSE) for details.
