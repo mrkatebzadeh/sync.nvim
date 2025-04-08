@@ -29,6 +29,20 @@ It helps with automating the deployment process by providing options to sync fil
    })
    #+END_SRC
 
+If you use Lazy, you can:
+
+    #+BEGIN_SRC lua
+    return {
+    	"mrkatebzadeh/sync.nvim",
+    	config = function()
+    		require("sync").setup({
+    			auto_start = false,
+          -- ... the rest of options
+    		})
+    	end,
+    }
+    #+END_SRC
+
 3. Create a ~.deploy.lua~ file at the root of your project to specify sync settings:
 
    #+BEGIN_SRC lua
