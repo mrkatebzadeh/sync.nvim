@@ -130,6 +130,8 @@ local function setup_auto_start()
   })
 end
 
+--- Setup the plugin
+---@param opts any
 function M.setup(opts)
   M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
 
@@ -142,6 +144,7 @@ function M.setup(opts)
   end
 end
 
+--- Load config file
 function M.load_config()
   local config_file = find_deploy_file()
   if config_file then
@@ -172,7 +175,7 @@ function M.load_config()
   end
 end
 
--- Reload config on demand
+--- Reload config on demand
 function M.reload_config()
   M.config = nil
   M.load_config()
@@ -190,6 +193,7 @@ local function is_passwordless_ssh(remote)
   return vim.v.shell_error == 0
 end
 
+--- Sync the remote path with local path
 function M.sync_now()
   if not M.config then
     M.load_config()
