@@ -102,7 +102,6 @@ local function setup_auto_sync()
         return
       end
       if is_file_in_project(filename) then
-        vim.notify("[sync.nvim] BufWritePost triggered for" .. filename)
         if M.options.auto_sync then
           M.sync_now()
         end
@@ -166,10 +165,10 @@ function M.load_config()
 
       vim.notify("[sync.nvim] Loaded config from " .. config_file)
     else
-      vim.notify("[sync.nvim] Invalid config file", vim.log.levels.ERROR)
+      vim.notify("[sync.nvim] ❌ Invalid config file", vim.log.levels.ERROR)
     end
   else
-    vim.notify("[sync.nvim] No .deploy.lua found", vim.log.levels.WARN)
+    vim.notify("[sync.nvim] ❌ No .deploy.lua found", vim.log.levels.WARN)
   end
 end
 
@@ -212,7 +211,7 @@ function M.sync_now()
   end
 
   if not local_path or not remote_path then
-    vim.notify("[sync.nvim] Missing root_local or root_remote", vim.log.levels.ERROR)
+    vim.notify("[sync.nvim] ❌ Missing root_local or root_remote", vim.log.levels.ERROR)
     return
   end
 
@@ -247,7 +246,7 @@ function M.sync_now()
       if data then
         for _, line in ipairs(data) do
           if line ~= "" then
-            vim.notify("[sync] " .. line, vim.log.levels.INFO)
+            vim.notify("[sync.nvim] " .. line, vim.log.levels.INFO)
           end
         end
       end
@@ -256,7 +255,7 @@ function M.sync_now()
       if data then
         for _, line in ipairs(data) do
           if line ~= "" then
-            vim.notify("[sync][err] " .. line, vim.log.levels.ERROR)
+            vim.notify("[sync.nvim] ❌" .. line, vim.log.levels.ERROR)
           end
         end
       end
@@ -269,6 +268,54 @@ function M.sync_now()
       end
     end,
   })
+end
+
+
+local function write_default_deploy_file(path)
+  local lines = {
+    "-- .deploy.lua",
+    "-- Configuration for sync.nvim",
+    "",
+    "-- You can override the plugin settings like this:",
+    "return {",
+    "--   remote = \"remotepath:~/MyProjects\"",
+    "--   local = \"~/MyProjects\"",
+    "  ignore = { \".git\", \"node_modules\" },",
+    "  auto_sync = false,",
+    "}",
+  }
+
+  local file = io.open(path, "w")
+  if file then
+    for _, line in ipairs(lines) do
+      file:write(line .. "\n")
+    end
+    file:close()
+    vim.notify("[sync.nvim] Created .deploy.lua with default comments at " .. path)
+  else
+    vim.notify("[sync.nvim] ❌ Failed to create .deploy.lua")
+  end
+end
+
+local function sync_init()
+  local root = get_project_root(vim.api.nvim_buf_get_name(0), ":p:h")
+  if not root then
+    vim.notify("[sync.nvim] ❌ Failed to find the root. SyncInit must be called in a git project.")
+    return false
+  end
+  local target = root .. "/.deploy.lua"
+
+  vim.ui.select({ "Yes", "No" }, {
+    prompt = "Initialize sync config at " .. target .. "?",
+  }, function(choice)
+    if choice == "Yes" then
+      if vim.fn.filereadable(target) == 1 then
+        vim.notify("[sync.nvim] .deploy.lua already exists.")
+      else
+        write_default_deploy_file(target)
+      end
+    end
+  end)
 end
 
 -- User commands
@@ -291,6 +338,9 @@ vim.api.nvim_create_user_command("SyncDryRun", function()
     M.options.dry_run = original
   end, 1000)
 end, {})
+
+
+vim.api.nvim_create_user_command("SyncInit", sync_init, {})
 
 return M
 
